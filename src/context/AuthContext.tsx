@@ -25,6 +25,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Função para verificar se o usuário é um administrador
+  const checkIfAdmin = (email: string | undefined) => {
+    const adminEmail = 'admin@nexplay.com.br';
+    const isUserAdmin = email === adminEmail;
+    console.log('Verificando admin:', { email, adminEmail, isAdmin: isUserAdmin });
+    return isUserAdmin;
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -37,8 +45,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (currentSession?.user) {
           const userEmail = currentSession.user.email;
           // Check if the email matches the admin email
-          setIsAdmin(userEmail === 'admin@nexplay.com.br');
-          console.log('Auth state changed:', { userEmail, isAdmin: userEmail === 'admin@nexplay.com.br' });
+          const adminStatus = checkIfAdmin(userEmail);
+          setIsAdmin(adminStatus);
+          console.log('Auth state changed:', { userEmail, isAdmin: adminStatus });
         } else {
           setIsAdmin(false);
         }
@@ -57,8 +66,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (currentSession?.user) {
         const userEmail = currentSession.user.email;
         // Check if the email matches the admin email
-        setIsAdmin(userEmail === 'admin@nexplay.com.br');
-        console.log('Initial session check:', { userEmail, isAdmin: userEmail === 'admin@nexplay.com.br' });
+        const adminStatus = checkIfAdmin(userEmail);
+        setIsAdmin(adminStatus);
+        console.log('Initial session check:', { userEmail, isAdmin: adminStatus });
       }
       
       setLoading(false);

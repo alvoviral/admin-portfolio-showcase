@@ -10,6 +10,7 @@ import StarBackground from "../components/StarBackground";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +18,17 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isAdmin } = useAuth();
+
+  // Redirecionar se o usuário já estiver logado
+  if (user) {
+    console.log("Usuário já está logado, redirecionando...", { isAdmin });
+    if (isAdmin) {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,24 +55,13 @@ const LoginPage = () => {
 
       console.log('Login bem-sucedido:', data);
 
-      // Check if the user is admin
-      if (email === 'admin@nexplay.com.br') {
-        toast({
-          title: "Login administrativo realizado com sucesso",
-          description: "Você será redirecionado para a página administrativa.",
-        });
-        
-        // Redirect to admin dashboard
-        navigate("/admin");
-      } else {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo de volta!",
-        });
-        
-        // Redirect regular users to home page
-        navigate("/");
-      }
+      // A lógica de redirecionamento foi movida para o useEffect que monitora o estado de autenticação
+      // O redirecionamento será feito automaticamente pelo componente quando o estado de autenticação mudar
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Você será redirecionado em instantes.",
+      });
+      
     } catch (error) {
       console.error("Erro durante o login:", error);
       toast({
