@@ -37,13 +37,24 @@ const LoginPage = () => {
         return;
       }
 
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Você será redirecionado para a página administrativa.",
-      });
-      
-      // Redirect to admin dashboard
-      navigate("/admin");
+      // Check if the user is admin
+      if (email === 'admin@nexplay.com.br') {
+        toast({
+          title: "Login administrativo realizado com sucesso",
+          description: "Você será redirecionado para a página administrativa.",
+        });
+        
+        // Redirect to admin dashboard
+        navigate("/admin");
+      } else {
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo de volta!",
+        });
+        
+        // Redirect regular users to home page
+        navigate("/");
+      }
     } catch (error) {
       console.error("Erro durante o login:", error);
       toast({

@@ -8,6 +8,7 @@ type AuthContextType = {
   user: User | null;
   signOut: () => Promise<void>;
   loading: boolean;
+  isAdmin: boolean; // Added admin status check
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,12 +16,14 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   signOut: async () => {},
   loading: true,
+  isAdmin: false, // Default value
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -28,6 +31,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       (event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        
+        // Check if the user is an admin based on email
+        if (currentSession?.user) {
+          const userEmail = currentSession.user.email;
+          // Check if the email matches the admin email
+          setIsAdmin(userEmail === 'admin@nexplay.com.br');
+        } else {
+          setIsAdmin(false);
+        }
+        
         setLoading(false);
       }
     );
@@ -36,6 +49,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
+      
+      // Check if the user is an admin based on email
+      if (currentSession?.user) {
+        const userEmail = currentSession.user.email;
+        // Check if the email matches the admin email
+        setIsAdmin(userEmail === 'admin@nexplay.com.br');
+      }
+      
       setLoading(false);
     });
 
@@ -47,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, signOut, loading }}>
+    <AuthContext.Provider value={{ session, user, signOut, loading, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
