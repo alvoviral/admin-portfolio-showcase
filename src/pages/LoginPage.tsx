@@ -23,19 +23,25 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Tentando fazer login com:', { email });
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('Erro de login:', error.message);
         toast({
           variant: "destructive",
           title: "Erro ao fazer login",
           description: error.message,
         });
+        setLoading(false);
         return;
       }
+
+      console.log('Login bem-sucedido:', data);
 
       // Check if the user is admin
       if (email === 'admin@nexplay.com.br') {

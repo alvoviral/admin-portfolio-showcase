@@ -34,12 +34,17 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
+      console.log('Tentando registrar com:', { email });
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: window.location.origin + '/login'
+        }
       });
 
       if (error) {
+        console.error('Erro no registro:', error.message);
         toast({
           variant: "destructive",
           title: "Erro no registro",
@@ -48,6 +53,7 @@ const RegisterPage = () => {
         return;
       }
 
+      console.log('Registro bem-sucedido:', data);
       toast({
         title: "Registro realizado com sucesso",
         description: "Você será redirecionado para a página de login.",

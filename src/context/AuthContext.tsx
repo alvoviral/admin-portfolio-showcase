@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const userEmail = currentSession.user.email;
           // Check if the email matches the admin email
           setIsAdmin(userEmail === 'admin@nexplay.com.br');
+          console.log('Auth state changed:', { userEmail, isAdmin: userEmail === 'admin@nexplay.com.br' });
         } else {
           setIsAdmin(false);
         }
@@ -55,6 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const userEmail = currentSession.user.email;
         // Check if the email matches the admin email
         setIsAdmin(userEmail === 'admin@nexplay.com.br');
+        console.log('Initial session check:', { userEmail, isAdmin: userEmail === 'admin@nexplay.com.br' });
       }
       
       setLoading(false);
