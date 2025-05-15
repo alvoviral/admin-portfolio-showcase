@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -31,7 +30,7 @@ const ContactPage = () => {
   
   const handleWhatsApp = () => {
     const message = "Olá! Estou interessado em seus serviços de IA.";
-    window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/551196342-5087?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
@@ -137,7 +136,7 @@ const ContactPage = () => {
                     </svg>
                     <div>
                       <h3 className="text-gray-300 font-medium">Telefone</h3>
-                      <p className="text-white">+55 11 9999-9999</p>
+                      <p className="text-white">+55 11 96342-5087</p>
                     </div>
                   </div>
                   <div className="flex items-start">

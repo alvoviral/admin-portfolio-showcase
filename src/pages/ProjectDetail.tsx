@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
@@ -37,7 +36,7 @@ const ProjectDetail = () => {
 
   const handleWhatsApp = () => {
     const message = `Olá! Estou interessado no projeto ${project.title}`;
-    window.open(`https://wa.me/${project.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/551196342-5087?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleViewProject = () => {

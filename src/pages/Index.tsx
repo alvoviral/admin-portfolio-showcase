@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -12,7 +11,7 @@ const Index = () => {
 
   const handleWhatsApp = () => {
     const message = "Olá! Estou interessado em seus serviços de IA.";
-    window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/551196342-5087?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
