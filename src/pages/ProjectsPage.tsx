@@ -8,7 +8,7 @@ import { useProjects } from "../context/ProjectsContext";
 import { ProjectCategory, projectCategories } from "../models/Project";
 
 const ProjectsPage = () => {
-  const { projects } = useProjects();
+  const { projects, loading } = useProjects();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -71,7 +71,11 @@ const ProjectsPage = () => {
             </div>
           </div>
 
-          {filteredProjects.length > 0 ? (
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <p className="text-xl text-gray-400">Carregando projetos...</p>
+            </div>
+          ) : filteredProjects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredProjects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
