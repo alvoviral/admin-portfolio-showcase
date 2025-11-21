@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,17 +18,19 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
 
-  // Redirecionar se o usuário já estiver logado
-  if (user) {
-    console.log("Usuário já está logado, redirecionando...", { isAdmin });
-    if (isAdmin) {
-      navigate("/admin");
-    } else {
-      navigate("/");
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      console.log("Usuário já está logado, redirecionando...", { isAdmin });
+      if (isAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     }
-  }
+  }, [user, isAdmin, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

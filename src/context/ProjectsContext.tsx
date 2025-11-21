@@ -1,14 +1,15 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Project, ProjectCategory } from "../models/Project";
-import { v4 as uuidv4 } from 'uuid';
+import { Project } from "../models/Project";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProjectsContextType {
   projects: Project[];
-  addProject: (project: Omit<Project, 'id' | 'createdAt'>) => void;
-  deleteProject: (id: string) => void;
-  editProject: (project: Project) => void;
+  addProject: (project: Omit<Project, 'id' | 'createdAt'>) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
+  editProject: (project: Project) => Promise<void>;
+  loading: boolean;
 }
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
@@ -25,76 +26,130 @@ interface ProjectsProviderProps {
   children: ReactNode;
 }
 
-// Sample projects data
-const sampleProjects: Project[] = [
-  {
-    id: "1",
-    title: "Projeto Andromeda",
-    description: "Uma revolução em inteligência artificial com processamento de linguagem natural avançado e integração com sistemas existentes.",
-    category: ProjectCategory.SAAS,
-    imageUrl: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1374&auto=format&fit=crop",
-    projectUrl: "https://example.com/andromeda",
-    whatsappNumber: "5511999999999",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "2",
-    title: "Sistema Nebula",
-    description: "Plataforma completa para gerenciamento de dados e análise preditiva com interface intuitiva e dashboards personalizáveis.",
-    category: ProjectCategory.WEB_SYSTEM,
-    imageUrl: "https://images.unsplash.com/photo-1517976547714-720226b864c1?q=80&w=1470&auto=format&fit=crop",
-    projectUrl: "https://example.com/nebula",
-    whatsappNumber: "5511999999999",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "3",
-    title: "Quantum Vision",
-    description: "Tecnologia de reconhecimento visual avançado com aplicações em segurança, varejo e medicina, utilizando redes neurais profundas.",
-    category: ProjectCategory.APPS,
-    imageUrl: "https://images.unsplash.com/photo-1535378620166-273708d44e4c?q=80&w=1471&auto=format&fit=crop",
-    projectUrl: "https://example.com/quantum",
-    whatsappNumber: "5511999999999",
-    createdAt: new Date().toISOString()
-  }
-];
-
 export const ProjectsProvider = ({ children }: ProjectsProviderProps) => {
-  const [projects, setProjects] = useState<Project[]>(() => {
-    const savedProjects = localStorage.getItem('projects');
-    return savedProjects ? JSON.parse(savedProjects) : sampleProjects;
-  });
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch projects from backend on mount
   useEffect(() => {
-    localStorage.setItem('projects', JSON.stringify(projects));
-  }, [projects]);
+    const fetchProjects = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-  const addProject = (projectData: Omit<Project, 'id' | 'createdAt'>) => {
-    const newProject: Project = {
-      ...projectData,
-      id: uuidv4(),
-      createdAt: new Date().toISOString()
+        if (error) throw error;
+
+        // Map database fields to Project model (snake_case to camelCase)
+        const mappedProjects: Project[] = (data || []).map(proj => ({
+          id: proj.id,
+          title: proj.title,
+          description: proj.description,
+          category: proj.category as any,
+          imageUrl: proj.image_url,
+          projectUrl: proj.project_url,
+          whatsappNumber: proj.whatsapp_number,
+          createdAt: proj.created_at
+        }));
+
+        setProjects(mappedProjects);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        toast.error("Erro ao carregar projetos");
+      } finally {
+        setLoading(false);
+      }
     };
-    setProjects((prev) => [newProject, ...prev]);
-    toast.success("Projeto adicionado com sucesso!");
+
+    fetchProjects();
+  }, []);
+
+  const addProject = async (projectData: Omit<Project, 'id' | 'createdAt'>) => {
+    try {
+      // Map camelCase to snake_case for database
+      const { data, error } = await supabase
+        .from('projects')
+        .insert({
+          title: projectData.title,
+          description: projectData.description,
+          category: projectData.category,
+          image_url: projectData.imageUrl,
+          project_url: projectData.projectUrl,
+          whatsapp_number: projectData.whatsappNumber
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Map back to Project model
+      const newProject: Project = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        category: data.category as any,
+        imageUrl: data.image_url,
+        projectUrl: data.project_url,
+        whatsappNumber: data.whatsapp_number,
+        createdAt: data.created_at
+      };
+
+      setProjects((prev) => [newProject, ...prev]);
+      toast.success("Projeto adicionado com sucesso!");
+    } catch (error: any) {
+      console.error('Error adding project:', error);
+      toast.error(error.message || "Erro ao adicionar projeto");
+    }
   };
 
-  const deleteProject = (id: string) => {
-    setProjects((prev) => prev.filter((project) => project.id !== id));
-    toast.success("Projeto removido com sucesso!");
+  const deleteProject = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setProjects((prev) => prev.filter((project) => project.id !== id));
+      toast.success("Projeto removido com sucesso!");
+    } catch (error: any) {
+      console.error('Error deleting project:', error);
+      toast.error(error.message || "Erro ao remover projeto");
+    }
   };
 
-  const editProject = (updatedProject: Project) => {
-    setProjects((prev) =>
-      prev.map((project) => 
-        project.id === updatedProject.id ? updatedProject : project
-      )
-    );
-    toast.success("Projeto atualizado com sucesso!");
+  const editProject = async (updatedProject: Project) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          title: updatedProject.title,
+          description: updatedProject.description,
+          category: updatedProject.category,
+          image_url: updatedProject.imageUrl,
+          project_url: updatedProject.projectUrl,
+          whatsapp_number: updatedProject.whatsappNumber
+        })
+        .eq('id', updatedProject.id);
+
+      if (error) throw error;
+
+      setProjects((prev) =>
+        prev.map((project) => 
+          project.id === updatedProject.id ? updatedProject : project
+        )
+      );
+      toast.success("Projeto atualizado com sucesso!");
+    } catch (error: any) {
+      console.error('Error updating project:', error);
+      toast.error(error.message || "Erro ao atualizar projeto");
+    }
   };
 
   return (
-    <ProjectsContext.Provider value={{ projects, addProject, deleteProject, editProject }}>
+    <ProjectsContext.Provider value={{ projects, addProject, deleteProject, editProject, loading }}>
       {children}
     </ProjectsContext.Provider>
   );

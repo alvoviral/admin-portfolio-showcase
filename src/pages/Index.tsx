@@ -7,7 +7,7 @@ import StarBackground from "../components/StarBackground";
 import { useProjects } from "../context/ProjectsContext";
 
 const Index = () => {
-  const { projects } = useProjects();
+  const { projects, loading } = useProjects();
   const featuredProjects = projects.slice(0, 3);
 
   const handleWhatsApp = () => {
@@ -54,11 +54,17 @@ const Index = () => {
             Conheça algumas das nossas soluções mais inovadoras em inteligência artificial e tecnologia avançada.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <p className="text-gray-400">Carregando projetos...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          )}
 
           <div className="mt-12 text-center">
             <Link to="/projetos" className="btn-primary">

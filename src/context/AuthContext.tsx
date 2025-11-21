@@ -25,12 +25,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Função para verificar se o usuário é um administrador
-  const checkIfAdmin = (email: string | undefined) => {
-    const adminEmail = 'admin@nexplay.com.br';
-    const isUserAdmin = email === adminEmail;
-    console.log('Verificando admin:', { email, adminEmail, isAdmin: isUserAdmin });
-    return isUserAdmin;
+  // Check if user has admin role from backend
+  const checkAdminRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error checking admin role:', error);
+        return false;
+      }
+      
+      return !!data;
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -41,13 +55,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // Check if the user is an admin based on email
+        // Check admin role from backend asynchronously (outside callback)
         if (currentSession?.user) {
-          const userEmail = currentSession.user.email;
-          // Check if the email matches the admin email
-          const adminStatus = checkIfAdmin(userEmail);
-          setIsAdmin(adminStatus);
-          console.log('Auth state changed:', { userEmail, isAdmin: adminStatus });
+          setTimeout(() => {
+            checkAdminRole(currentSession.user.id).then(isAdminUser => {
+              setIsAdmin(isAdminUser);
+              console.log('Auth state changed:', { userId: currentSession.user.id, isAdmin: isAdminUser });
+            });
+          }, 0);
         } else {
           setIsAdmin(false);
         }
@@ -62,13 +77,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
-      // Check if the user is an admin based on email
+      // Check admin role from backend
       if (currentSession?.user) {
-        const userEmail = currentSession.user.email;
-        // Check if the email matches the admin email
-        const adminStatus = checkIfAdmin(userEmail);
-        setIsAdmin(adminStatus);
-        console.log('Initial session check:', { userEmail, isAdmin: adminStatus });
+        checkAdminRole(currentSession.user.id).then(isAdminUser => {
+          setIsAdmin(isAdminUser);
+          console.log('Initial session check:', { userId: currentSession.user.id, isAdmin: isAdminUser });
+        });
       }
       
       setLoading(false);
