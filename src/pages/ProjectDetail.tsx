@@ -37,7 +37,7 @@ const ProjectDetail = () => {
 
   const handleWhatsApp = () => {
     const message = `Olá! Estou interessado no projeto ${project.title}`;
-    window.open(`https://wa.me/5511963425087?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/5598981501676?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleViewProject = () => {

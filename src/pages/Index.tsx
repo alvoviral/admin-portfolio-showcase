@@ -12,7 +12,7 @@ const Index = () => {
 
   const handleWhatsApp = () => {
     const message = "Olá! Estou interessado em seus serviços de IA.";
-    window.open(`https://wa.me/5511963425087?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/5598981501676?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
