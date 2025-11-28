@@ -36,9 +36,25 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, isEditing = false })
     }
   }, [isEditing, project]);
 
+  const convertGoogleDriveUrl = (url: string): string => {
+    // Converte links do Google Drive para formato direto
+    const driveMatch = url.match(/\/file\/d\/([^\/]+)/);
+    if (driveMatch) {
+      return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+    }
+    return url;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Converte automaticamente URLs do Google Drive
+    if (name === 'imageUrl' && value) {
+      const convertedUrl = convertGoogleDriveUrl(value);
+      setFormData((prev) => ({ ...prev, [name]: convertedUrl }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -165,8 +181,26 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, isEditing = false })
             value={formData.imageUrl}
             onChange={handleChange}
             className="w-full p-2 bg-gray-800 border border-gray-700 rounded text-white"
-            placeholder="https://exemplo.com/imagem.jpg"
+            placeholder="Cole o link do Google Drive ou URL da imagem"
           />
+          <p className="text-xs text-gray-400">
+            ✓ Links do Google Drive são convertidos automaticamente<br />
+            ✓ URLs diretas de imagem (jpg, png, etc.)
+          </p>
+          {formData.imageUrl && (
+            <div className="mt-2">
+              <p className="text-xs text-gray-400 mb-1">Preview:</p>
+              <img 
+                src={formData.imageUrl} 
+                alt="Preview" 
+                className="w-32 h-32 object-cover rounded border border-gray-700"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  toast.error("Não foi possível carregar a imagem. Verifique a URL.");
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
