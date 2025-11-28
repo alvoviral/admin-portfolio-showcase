@@ -1,29 +1,27 @@
-
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ProjectCard from "../components/ProjectCard";
 import StarBackground from "../components/StarBackground";
 import { useProjects } from "../context/ProjectsContext";
-
 const Index = () => {
-  const { projects, loading } = useProjects();
+  const {
+    projects,
+    loading
+  } = useProjects();
   const featuredProjects = projects.slice(0, 3);
-
   const handleWhatsApp = () => {
     const message = "Olá! Estou interessado em seus serviços de IA.";
     window.open(`https://wa.me/5598981501676?text=${encodeURIComponent(message)}`, '_blank');
   };
-
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <StarBackground />
       <Navbar />
 
       {/* Hero Section */}
       <section className="flex-grow flex flex-col justify-center items-center text-center px-4 py-12 md:py-24 relative">
         <h1 className="text-4xl md:text-7xl font-bold mb-4 text-white leading-tight">
-          <span className="text-nexplay-gold">Nexplay IA</span><br />
+          <span className="text-nexplay-gold">Nexplay Digital</span><br />
           <span>O Futuro da Inovação</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-300 max-w-3xl mb-8">
@@ -54,17 +52,11 @@ const Index = () => {
             Conheça algumas das nossas soluções mais inovadoras em inteligência artificial e tecnologia avançada.
           </p>
 
-          {loading ? (
-            <div className="flex justify-center py-12">
+          {loading ? <div className="flex justify-center py-12">
               <p className="text-gray-400">Carregando projetos...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          )}
+            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProjects.map(project => <ProjectCard key={project.id} project={project} />)}
+            </div>}
 
           <div className="mt-12 text-center">
             <Link to="/projetos" className="btn-primary">
@@ -104,8 +96,6 @@ const Index = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
